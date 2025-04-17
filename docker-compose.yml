@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:15
+    container_name: efit_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: efit_db
+      POSTGRES_USER: gabrielcastro
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  chromadb:
+    image: ghcr.io/chroma-core/chroma:latest
+    container_name: efit_chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - /home/gcastro/efit-volumes/chroma_shared:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+
+  langflow:
+    image: langflowai/langflow:latest
+    container_name: efit_langflow
+    ports:
+      - "7860:7860"
+    volumes:
+      - /home/gcastro/efit-volumes/langflow_data:/app/langflow_data
+      - /home/gcastro/efit-volumes/chroma_shared:/app/chroma/chroma
+    environment:
+      - LANGFLOW_DATABASE_URL=sqlite:////app/langflow_data/langflow.db
+
+volumes:
+  postgres_data:
