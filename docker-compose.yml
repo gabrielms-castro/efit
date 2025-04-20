@@ -1,37 +1,63 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:15
     container_name: efit_postgres
     restart: always
     environment:
-      POSTGRES_DB: efit_db
-      POSTGRES_USER: gabrielcastro
-      POSTGRES_PASSWORD: 123456
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - efit-network
 
   chromadb:
     image: ghcr.io/chroma-core/chroma:latest
     container_name: efit_chromadb
-    ports:
-      - "8000:8000"
-    volumes:
-      - /home/gcastro/efit-volumes/chroma_shared:/chroma/chroma
     environment:
       - IS_PERSISTENT=TRUE
-
-  langflow:
-    image: langflowai/langflow:latest
-    container_name: efit_langflow
-    ports:
-      - "7860:7860"
     volumes:
-      - /home/gcastro/efit-volumes/langflow_data:/app/langflow_data
-      - /home/gcastro/efit-volumes/chroma_shared:/app/chroma/chroma
+      - ./chroma_shared:/chroma/chroma
+    ports:
+      - "8001:8000"
+    networks:
+      - efit-network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: efit_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    working_dir: /code
+    ports:
+      - "8000:8000"
     environment:
-      - LANGFLOW_DATABASE_URL=sqlite:////app/langflow_data/langflow.db
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CHROMA_DIR=/code/chroma_shared
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - db
+      - chromadb
+    networks:
+      - efit-network
 
 volumes:
   postgres_data:
+  chroma_shared:
+
+networks:
+  efit-network:
+    driver: bridge

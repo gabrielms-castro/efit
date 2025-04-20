@@ -1,0 +1,33 @@
+<!-- treino/templates/treino.html -->
+<h2 class="text-2xl font-bold mb-6">Seu Treino Personalizado</h2>
+
+{% if treino.erro %}
+  <p class="text-red-500">{{ treino.erro }}</p>
+{% else %}
+  <table class="table-auto border border-gray-400 w-full">
+      <thead>
+          <tr class="bg-gray-200">
+              <th class="border px-4 py-2">Exercício</th>
+              <th class="border px-4 py-2">Séries</th>
+              <th class="border px-4 py-2">Repetições</th>
+              <th class="border px-4 py-2">RPE</th>
+              <th class="border px-4 py-2">Carga</th>
+              <th class="border px-4 py-2">Descanso</th>
+              <th class="border px-4 py-2">Observações</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for ex in treino.treino.exercicios %}
+          <tr>
+              <td class="border px-4 py-2">{{ ex.nome }}</td>
+              <td class="border px-4 py-2">{{ ex.series }}</td>
+              <td class="border px-4 py-2">{{ ex.repeticoes }}</td>
+              <td class="border px-4 py-2">{{ ex.rpe }}</td>
+              <td class="border px-4 py-2">{{ ex.carga_estimada_kg }}</td>
+              <td class="border px-4 py-2">{{ ex.descanso }}</td>
+              <td class="border px-4 py-2">{{ ex.observacoes }}</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+{% endif %}
