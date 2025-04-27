@@ -173,3 +173,6 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 *.pdf
+
+*.sqlite3
+/chroma_db
